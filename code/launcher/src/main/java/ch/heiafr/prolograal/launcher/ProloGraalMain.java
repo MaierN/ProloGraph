@@ -48,8 +48,6 @@ public final class ProloGraalMain {
          return 1;
       }
 
-      context.eval("pl","useinterpreter.");
-
       try {
          context.eval(source);
          return 0;
