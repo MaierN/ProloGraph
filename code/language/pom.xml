@@ -18,8 +18,7 @@
             <include>**/*TestSuite.java</include>
             <include>**/*Test.java</include>
           </includes>
-          <!-- COMMENT THE FOLLOWING LINE IF YOU USE GRAALJDK FOR JAVA 11 -->
-          <!-- <argLine>-XX:-UseJVMCIClassLoader</argLine> -->
+          <argLine>-Dtruffle.class.path.append=${project.build.directory}/prolograal.jar</argLine>
         </configuration>
       </plugin>
       <plugin>
