@@ -3,7 +3,6 @@ package ch.heiafr.prolograal.launcher;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.PolyglotException;
 import org.graalvm.polyglot.Source;
-import org.graalvm.polyglot.Value;
 
 import java.io.*;
 import java.util.HashMap;
@@ -49,27 +48,7 @@ public final class ProloGraalMain {
          return 1;
       }
 
-      Value prologBoolean1 = context.eval("pl","useinterpreter.");
-
-      //System.out.println("###First test###");
-      Value prologBoolean = context.eval("pl","useinterpreter, consultstring('test(10).'), test(A), is(B,'**'(2,A)).");
-      System.out.println("Did request success? "+prologBoolean.asBoolean());
-      if(prologBoolean.asBoolean()){
-         System.out.println("A value: "+prologBoolean.getMember("A").asInt());
-         System.out.println("B value: "+prologBoolean.getMember("B").asInt());
-      }
-
-      System.out.println("###Second test###");
-      Value prologBooleanArray = context.eval("pl","consultstring(~test(a). test2(b).~). test(A). test2(c), test2(B).");
-      System.out.println("did 2nd request success? " + prologBooleanArray.getArrayElement(1).asBoolean());
-      System.out.println("A value: "+prologBooleanArray.getArrayElement(1).getMember("A").asString());
-      System.out.println("did 3nd request success? " + prologBooleanArray.getArrayElement(2).asBoolean());
-
-      //System.out.println("TEST:" + context.eval("pl","consultstring(~test(8). test(10). test2('value'). t(X):-test(X).~), test2(X), test(A), is(B,'**'(2,A)), useinterpreter.").getMember("X").asString());
-
-      //System.out.println("TEST:" + context.eval("pl","trace. consult('C:\\Users\\Tony\\Documents\\Projets\\prolog-truffle\\code\\language\\tests\\07_benchmark.pl'), recommendedN(N), benchmark(N). recommendedN(W).").getArrayElement(2).getMember("W").asInt());
-
-      System.out.println("== running on " + context.getEngine());
+      context.eval("pl","useinterpreter.");
 
       try {
          context.eval(source);
