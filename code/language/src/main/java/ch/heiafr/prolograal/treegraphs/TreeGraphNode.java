@@ -1,6 +1,7 @@
 package ch.heiafr.prolograal.treegraphs;
 
 import java.util.ArrayList;
+import java.util.StringJoiner;
 
 public class TreeGraphNode {
     public static String NEW_LINE = "_NL_";
@@ -22,27 +23,30 @@ public class TreeGraphNode {
             if (text != null) {
                 if (text.size() > 0) {
                     r += "\"text\": [";
+                    StringJoiner sj = new StringJoiner(", ");
                     for (String s : text) {
-                        r += "\"" + s + "\", ";
+                        sj.add("\"" + s + "\"");
                     }
-                    r = r.substring(0, r.length() - 2);
+                    r += sj;
                     r += "], ";
                 }
             }
             if (linkText != null && linkText.size() > 0) {
                 r += "\"link_text\": [";
+                StringJoiner sj = new StringJoiner(", ");
                 for (String s : linkText) {
-                    r += "\"" + s + "\", ";
+                    sj.add("\"" + s + "\"");
                 }
-                r = r.substring(0, r.length() - 2);
+                r += sj;
                 r += "], ";
             }
             if (subText == null) {
                 r += "\"children\": [";
+                StringJoiner sj = new StringJoiner(", ");
                 for (TreeGraphNode child : children) {
-                    r += child.toString() + ", ";
+                    sj.add(child.toString());
                 }
-                r = r.substring(0, r.length() - 2);
+                r += sj;
                 r += "], ";
             }
         }

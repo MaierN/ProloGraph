@@ -164,10 +164,17 @@ def correct_tree(tree):
             first = False
             odd = not odd
         tree['link_text'] = s
+    else:
+        tree['link_text'] = ''
     
     if 'children' in tree:
+        not_fail = False
         for child in tree['children']:
             correct_tree(child)
+            if 'is_empty' not in child:
+                not_fail = True
+        if not not_fail:
+            tree['sub_text'] = 'ÉCHEC'
     else:
         tree['children'] = []
 
@@ -228,11 +235,16 @@ if __name__ == "__main__":
     prolograal = subprocess.Popen(command, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     out, err = prolograal.communicate(input=("graph.\nautoredo.\n" + sys.argv[2] + "\nexit.\n").encode('utf-8'))
     data = out.decode('utf-8')
-    tree = ""
+    tree = ''
     lines = data.split('\n')
     for i in range(len(lines)):
         if lines[i] == '============ tree graph:' and i+1 < len(lines):
             tree = lines[i+1]
+
+    if not tree:
+        print('Error, prolograal did not output graph info, see output below:')
+        print(data)
+        exit()
 
     #print("Using tree:", tree)
 
@@ -241,7 +253,7 @@ if __name__ == "__main__":
 
     #print("Corrected tree:", tree)
 
-    print('...')
+    print('Generating graph...')
 
     # First one to get the level offsets
     doc, root = init_doc()

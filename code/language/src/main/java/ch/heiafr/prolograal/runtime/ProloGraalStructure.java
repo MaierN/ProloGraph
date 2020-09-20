@@ -147,7 +147,7 @@ public class ProloGraalStructure extends ProloGraalTerm<ProloGraalStructure> {
          return "(Empty structure)";
       } else if (functor.equals(ProloGraalBuiltinAtoms.DOT_OPERATOR) && arity == 2) {
          ProloGraalList list = ProloGraalList.fromInternal(this);
-         String tail = !list.getTail().equals(ProloGraalBuiltinAtoms.EMPTY_LIST) ? " | " + list.getTail().toString()
+         String tail = !list.getTail().equals(ProloGraalBuiltinAtoms.EMPTY_LIST) ? "|" + list.getTail().toString()
                  : "";
          return "[" + list.getItems().stream().map(Object::toString).collect(Collectors.joining(",")) + tail + "]";
       }

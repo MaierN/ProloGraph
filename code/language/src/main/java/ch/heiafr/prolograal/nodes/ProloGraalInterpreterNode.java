@@ -181,6 +181,8 @@ public class ProloGraalInterpreterNode extends RootNode {
             }
          } catch (ProloGraalExistenceError existenceError) {
             writer.println("Error : no clause for goal '" + existenceError.getMessage() + "'");
+            lastRuntime = null;
+            treeGraphNode = null;
             continue;
          }
          writer.println();

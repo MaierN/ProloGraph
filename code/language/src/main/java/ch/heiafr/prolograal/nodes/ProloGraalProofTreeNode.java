@@ -226,7 +226,7 @@ public class ProloGraalProofTreeNode extends Node {
                      //System.out.println("=== new bound variables: " + listenedVariables);
 
                      // only execute built-in the first time we traverse their nodes
-                     if (branches.isEmpty()) {
+                     if (true || branches.isEmpty()) {
                         if(currentGoal instanceof ProloGraalBuiltinStructure){
                            if(!((ProloGraalBuiltinStructure)currentGoal).getBuiltin().executeBuiltin(frame).asBoolean()) {
                               returnedValue = new ProloGraalFailure();
@@ -327,7 +327,7 @@ public class ProloGraalProofTreeNode extends Node {
          TreeGraphNode successTreeNode = new TreeGraphNode();
          successTreeNode.linkText = toStringArray(listenedVariables);
          successTreeNode.text = new ArrayList<>();
-         successTreeNode.subText = "SUCCES";
+         successTreeNode.subText = "SUCCÈS";
          successTreeNode.parent = newTree;
          newTree.children.add(successTreeNode);
       }
