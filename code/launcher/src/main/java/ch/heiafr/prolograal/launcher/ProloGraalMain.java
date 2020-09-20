@@ -27,18 +27,10 @@ public final class ProloGraalMain {
          }
       }
 
-      if (file == null) {
-         // @formatter:off
-         source = Source.newBuilder(PROLOGRAAL, new InputStreamReader(System.in), "<stdin>").build();
-         // @formatter:on
-      } else {
-         source = Source.newBuilder(PROLOGRAAL, new File(file)).build();
-      }
-
-      System.exit(executeSource(source, options));
+      System.exit(executeSource(file, options));
    }
 
-   private static int executeSource(Source source, Map<String, String> options) {
+   private static int executeSource(String file, Map<String, String> options) {
       Context context;
       PrintStream err = System.err;
       try {
@@ -49,7 +41,8 @@ public final class ProloGraalMain {
       }
 
       try {
-         context.eval(source);
+         if (file != null) context.eval("pl", "consult('" + file + "'). useinterpreter.");
+         else context.eval("pl", "useinterpreter.");
          return 0;
       } catch (PolyglotException ex) {
          if (ex.isInternalError()) {
