@@ -1,6 +1,8 @@
 package ch.heiafr.prolograal.runtime;
 
 import ch.heiafr.prolograal.builtins.ProloGraalBuiltinAtoms;
+import ch.heiafr.prolograal.nodes.ProloGraalProofTreeNode;
+
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.library.ExportLibrary;
@@ -37,6 +39,13 @@ public class ProloGraalStructure extends ProloGraalTerm<ProloGraalStructure> {
       subterms = copiedStruct.subterms;
       subVariables = copiedStruct.subVariables;
       arity = copiedStruct.arity;
+   }
+   
+   @Override
+   public void observe(ProloGraalProofTreeNode proofTreeNode) {
+      for (int i = 0; i < this.arity; i++) {
+         this.subterms.get(i).observe(proofTreeNode);
+      }
    }
 
    /**
@@ -130,6 +139,20 @@ public class ProloGraalStructure extends ProloGraalTerm<ProloGraalStructure> {
       }
       String subtermsString = subterms.toString();
       return functor.getName() + "/" + arity + "(" + subtermsString.substring(1, subtermsString.length() - 1) + ")";
+   }
+
+   @Override
+   public String toGraphString() {
+      if (functor == null) {
+         return "(Empty structure)";
+      } else if (functor.equals(ProloGraalBuiltinAtoms.DOT_OPERATOR) && arity == 2) {
+         ProloGraalList list = ProloGraalList.fromInternal(this);
+         String tail = !list.getTail().equals(ProloGraalBuiltinAtoms.EMPTY_LIST) ? " | " + list.getTail().toString()
+                 : "";
+         return "[" + list.getItems().stream().map(Object::toString).collect(Collectors.joining(", ")) + tail + "]";
+      }
+      String subtermsString = subterms.toString();
+      return functor.getName() + "(" + subtermsString.substring(1, subtermsString.length() - 1) + ")";
    }
 
    /**

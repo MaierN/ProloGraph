@@ -5,6 +5,8 @@ import ch.heiafr.prolograal.exceptions.ProloGraalExistenceError;
 import ch.heiafr.prolograal.parser.ProloGraalParseError;
 import ch.heiafr.prolograal.parser.ProloGraalParserImpl;
 import ch.heiafr.prolograal.runtime.*;
+import ch.heiafr.prolograal.treegraphs.TreeGraphNode;
+
 import com.oracle.truffle.api.Truffle;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.RootNode;
@@ -31,6 +33,8 @@ public class ProloGraalInterpreterNode extends RootNode {
    private final ProloGraalLanguage language;
    private final ProloGraalContext context;
 
+   private boolean showGraph = false;
+
    public ProloGraalInterpreterNode(ProloGraalLanguage language) {
       super(language);
       this.language = language;
@@ -47,6 +51,7 @@ public class ProloGraalInterpreterNode extends RootNode {
       Deque<Integer> currentBranches = new ArrayDeque<>();
       // store the runtime of the latest query so we can reuse it in case of a redo
       ProloGraalRuntime lastRuntime = null;
+      TreeGraphNode treeGraphNode = null;
       // used in case of a redo to skip parsing phase
       boolean skipParsing = false;
 
@@ -96,6 +101,15 @@ public class ProloGraalInterpreterNode extends RootNode {
                continue;
             }
             skipParsing = true;
+         } else if (line.equals("graph.")) {
+            System.out.println("graph enabled");
+            showGraph = true;
+            continue;
+         } else if (line.equals("nograph.")) {
+            System.out.println("graph disabled");
+            treeGraphNode = null;
+            showGraph = false;
+            continue;
          } else if (line.equals("help") || line.equals("help.")) {
             writer.println(
                   "Available commands :\n" +
@@ -125,6 +139,7 @@ public class ProloGraalInterpreterNode extends RootNode {
                runtime = new ProloGraalRuntime(language.getContextReference().get());
                runtime.addProloGraalClauses(ProloGraalParserImpl.parseClauses(source));
                lastRuntime = runtime;
+               treeGraphNode = showGraph ? new TreeGraphNode() : null;
             } else {
                runtime = lastRuntime;
             }
@@ -142,10 +157,14 @@ public class ProloGraalInterpreterNode extends RootNode {
             callResult =
                   (ProloGraalBoolean) Truffle.getRuntime()
                   .createCallTarget(context.getResolverNode())
-                  .call(runtime, currentBranches);
+                  .call(runtime, currentBranches, treeGraphNode);
             if (currentBranches.isEmpty()) {
                // there are no more solutions
                lastRuntime = null;
+               if (treeGraphNode != null) {
+                  System.out.println("============ tree graph:");
+                  System.out.println(treeGraphNode);
+               }
             }
          } catch (ProloGraalExistenceError existenceError) {
             writer.println("Error : no clause for goal '" + existenceError.getMessage() + "'");

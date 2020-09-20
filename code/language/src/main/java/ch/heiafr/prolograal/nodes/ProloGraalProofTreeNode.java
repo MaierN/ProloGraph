@@ -2,6 +2,7 @@ package ch.heiafr.prolograal.nodes;
 
 import ch.heiafr.prolograal.ProloGraalLanguage;
 import ch.heiafr.prolograal.runtime.ProloGraalObject;
+import ch.heiafr.prolograal.treegraphs.TreeGraphNode;
 import ch.heiafr.prolograal.builtins.predicates.ProloGraalBuiltinClause;
 import ch.heiafr.prolograal.exceptions.ProloGraalExistenceError;
 import ch.heiafr.prolograal.runtime.*;
@@ -37,6 +38,26 @@ public class ProloGraalProofTreeNode extends Node {
 
    private final boolean traceFlag; // is the trace ON ?
 
+   private ArrayList<String> toStringArray(ArrayList<ProloGraalVariable> list) {
+      ArrayList<String> r = new ArrayList<>();
+      for (ProloGraalVariable var : list) {
+         r.add(var.toGraphString());
+      }
+      return r;
+   }
+
+   private ArrayList<String> toStringArray(Deque<ProloGraalTerm<?>> list) {
+      ArrayList<String> r = new ArrayList<>();
+      for (ProloGraalTerm<?> var : list) {
+         r.add(var.toGraphString());
+      }
+      return r;
+   }
+
+   private final ArrayList<ProloGraalVariable> listenedVariables = new ArrayList<>();
+   
+   public TreeGraphNode tree;
+
    private enum ExecuteState {
       BEGIN,
       RUNNING,
@@ -50,12 +71,17 @@ public class ProloGraalProofTreeNode extends Node {
    public static final String TRACE_QUESTION_MARK = "?";
 
    public ProloGraalProofTreeNode(Map<ProloGraalTerm<?>, List<ProloGraalClause>> clauses,
-                                  Deque<ProloGraalTerm<?>> goals, boolean traceFlag) {
+                                  Deque<ProloGraalTerm<?>> goals, boolean traceFlag, TreeGraphNode tree) {
       this.clauses = clauses;
       this.traceFlag = traceFlag;
       this.localVarsStack = new Stack<>();
       this.goalsStack = new Stack<>();
       goalsStack.push(goals);
+      this.tree = tree;
+   }
+
+   public void variableListener(ProloGraalVariable var) {
+      listenedVariables.add(var);
    }
 
    /**
@@ -87,6 +113,7 @@ public class ProloGraalProofTreeNode extends Node {
                }
 
                int start = 0;
+               boolean skipTreeNode = !branches.isEmpty();
                if (!branches.isEmpty()) {
                   // if we're redoing we need to skip to the right branch directly
                   start = branches.pop();
@@ -113,17 +140,35 @@ public class ProloGraalProofTreeNode extends Node {
                   throw new ProloGraalExistenceError(currentGoal);
                }
 
+               //System.out.println("==== goals: " + currentGoals);
+               if (tree != null) {
+                  if (!skipTreeNode) {
+                     TreeGraphNode newTree = new TreeGraphNode();
+                     newTree.parent = tree;
+                     newTree.text = toStringArray(currentGoals);
+                     newTree.linkText = toStringArray(listenedVariables);
+                     tree.children.add(newTree);
+                     tree = newTree;
+                  } else {
+                     TreeGraphNode newTree = tree;
+                     while (newTree.parent != null) newTree = newTree.parent;
+                     //tree = tree.children.get(start - 1);
+                     tree = tree.children.get(tree.children.size() - 1);
+                  }
+               }
+
                // copy used for lambda
-               ProloGraalTerm<?> currentGoalCopy = currentGoal.copy(currentGoal.getVariables());
+               //ProloGraalTerm<?> currentGoalCopy = currentGoal.copy(currentGoal.getVariables());
                // filter clauses that are unifiable with the current goal, creating copies and saving variables state as needed
                List<ProloGraalClause> unifiableClauses =
                      IntStream.range(0, possibleClauses.size())
                            .filter(x -> {
-                              ProloGraalClause clause = possibleClauses.get(x).copy();
-                              currentGoalCopy.save();
-                              boolean r = clause.getHead().unify(currentGoalCopy);
-                              currentGoalCopy.undo();
-                              return r;
+                              //ProloGraalClause clause = possibleClauses.get(x).copy();
+                              //currentGoalCopy.save();
+                              //boolean r = clause.getHead().unify(currentGoalCopy);
+                              //currentGoalCopy.undo();
+                              //return r;
+                              return true;
                            })
                            .mapToObj(x -> possibleClauses.get(x).copy()) // create a copy of each filtered clauses
                            .collect(Collectors.toList());
@@ -150,13 +195,35 @@ public class ProloGraalProofTreeNode extends Node {
                      // no need to copy here since it is already one
                      ProloGraalClause unifiableClause = unifiableClauses.get(i);
 
+                     ProloGraalTerm<?> currentGoalCopy = currentGoal.copy(currentGoal.getVariables());
+                     ProloGraalClause clause = unifiableClause.copy();
+                     currentGoalCopy.save();
+                     boolean r = clause.getHead().unify(currentGoalCopy);
+                     currentGoalCopy.undo();
+
+                     if (!r) {
+                        //System.out.println("=== --------");
+                        if (tree != null) {
+                           TreeGraphNode newTree = new TreeGraphNode();
+                           newTree.parent = tree;
+                           newTree.isEmpty = true;
+                           tree.children.add(newTree);
+                        }
+                        continue;
+                     }
+
                      currentGoal.save();
+
+                     listenedVariables.clear();
+                     currentGoal.observe(this);
+                     unifiableClause.getHead().observe(this);
 
                      // unify the head with the current goal
                      unifiableClause.getHead().unify(currentGoal);
                      if (ProloGraalLanguage.DEBUG_MODE) {
                         System.out.println("Unified " + currentGoal + " with " + unifiableClause.getHead());
                      }
+                     //System.out.println("=== new bound variables: " + listenedVariables);
 
                      // only execute built-in the first time we traverse their nodes
                      if (branches.isEmpty()) {
@@ -216,6 +283,12 @@ public class ProloGraalProofTreeNode extends Node {
                         System.out.println(TRACE_LEFT_WHITE_SPACE + goalsStack.size() + 1 + TRACE_LEFT_WHITE_SPACE + (start + 1)
                               + TRACE_BETWEEN_WHITE_SPACE + TRACE_EXIT_TEXT + currentGoal + TRACE_BETWEEN_WHITE_SPACE + TRACE_QUESTION_MARK);
                      }
+
+                     //System.out.println("=== (succes)");
+                     if (tree != null) {
+                        tree = tree.parent;
+                     }
+
                      //set the returned value as a success and break the for loop to simulate a return statement
                      returnedValue = new ProloGraalSuccess();
                      executeState = ExecuteState.RETURN;
@@ -227,6 +300,11 @@ public class ProloGraalProofTreeNode extends Node {
                //if we broke the for to return something or simulate another call,
                //break before we set returnedValue to failure (behaviour of no unifiable clause)
                if(executeState == ExecuteState.BEGIN || executeState == ExecuteState.RETURN)break;
+
+               if (tree != null) {
+                  tree = tree.parent;
+               }
+
                returnedValue = new ProloGraalFailure();
                executeState = ExecuteState.RETURN;
                break;
@@ -239,6 +317,21 @@ public class ProloGraalProofTreeNode extends Node {
       }catch(Exception e){
          e.printStackTrace();
       }*/
+
+      //System.out.println(((ProloGraalBoolean) returnedValue).asBoolean() ? "=== SUCCES" : "=== ECHEC");
+      if (tree != null && ((ProloGraalBoolean) returnedValue).asBoolean()) {
+         TreeGraphNode newTree = tree;
+         while (newTree.children.size() > 0 && !newTree.children.get(newTree.children.size() - 1).isEmpty) {
+            newTree = newTree.children.get(newTree.children.size() - 1);
+         }
+         TreeGraphNode successTreeNode = new TreeGraphNode();
+         successTreeNode.linkText = toStringArray(listenedVariables);
+         successTreeNode.text = new ArrayList<>();
+         successTreeNode.subText = "SUCCES";
+         successTreeNode.parent = newTree;
+         newTree.children.add(successTreeNode);
+      }
+
       return returnedValue;
    }
 }

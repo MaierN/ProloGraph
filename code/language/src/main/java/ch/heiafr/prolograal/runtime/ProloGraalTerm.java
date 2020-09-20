@@ -1,6 +1,7 @@
 package ch.heiafr.prolograal.runtime;
 
 import ch.heiafr.prolograal.exceptions.ProloGraalTypeCastingError;
+import ch.heiafr.prolograal.nodes.ProloGraalProofTreeNode;
 
 import java.util.Map;
 
@@ -16,6 +17,8 @@ public abstract class ProloGraalTerm<T extends ProloGraalTerm<T>> extends ProloG
    public static final String VARIABLE_TYPE = "variable";
    public static final String NUMBER_TYPE = "number";
    public static final String STRUCTURE_TYPE = "structure";
+
+   public void observe(ProloGraalProofTreeNode proofTreeNode) {}
 
    // the hashcode of this object
    // each subclass should set this accordingly in its constructor
@@ -38,6 +41,10 @@ public abstract class ProloGraalTerm<T extends ProloGraalTerm<T>> extends ProloG
    @Override
    public int hashCode() {
       return this.hashCode;
+   }
+
+   public String toGraphString() {
+      return toString();
    }
 
    /**

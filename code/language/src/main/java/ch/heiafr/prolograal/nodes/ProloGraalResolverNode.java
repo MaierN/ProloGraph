@@ -2,6 +2,7 @@ package ch.heiafr.prolograal.nodes;
 
 import ch.heiafr.prolograal.ProloGraalLanguage;
 import ch.heiafr.prolograal.runtime.ProloGraalObject;
+import ch.heiafr.prolograal.treegraphs.TreeGraphNode;
 import ch.heiafr.prolograal.runtime.*;
 import com.oracle.truffle.api.frame.VirtualFrame;
 import com.oracle.truffle.api.nodes.NodeInfo;
@@ -34,6 +35,7 @@ public final class ProloGraalResolverNode extends RootNode {
       ProloGraalRuntime goalRuntime = (ProloGraalRuntime) frame.getArguments()[0];
       @SuppressWarnings("unchecked")
       Deque<Integer> branches = (Deque<Integer>) frame.getArguments()[1];
+      TreeGraphNode treeGraphNode = (TreeGraphNode) frame.getArguments()[2];
 
       if (ProloGraalLanguage.DEBUG_MODE) {
          System.out.println("Executing : " + goalRuntime.getFirstClause());
@@ -48,7 +50,7 @@ public final class ProloGraalResolverNode extends RootNode {
       // also, the javadoc for the Stack encourages the use of a Deque instead
       Deque<ProloGraalTerm<?>> goals = new ArrayDeque<>(clause.getGoals());
       // create the root node of the proof tree
-      ProloGraalProofTreeNode proofTreeNode = new ProloGraalProofTreeNode(clauses, goals, context.isTraceFlag());
+      ProloGraalProofTreeNode proofTreeNode = new ProloGraalProofTreeNode(clauses, goals, context.isTraceFlag(), treeGraphNode);
       // start the execution of the proof tree, and stores the result
       ProloGraalObject r = proofTreeNode.execute(frame, branches);
       if(r instanceof ProloGraalBoolean){
@@ -59,7 +61,7 @@ public final class ProloGraalResolverNode extends RootNode {
          }
       }
 
-
+      
       return r;
    }
 }

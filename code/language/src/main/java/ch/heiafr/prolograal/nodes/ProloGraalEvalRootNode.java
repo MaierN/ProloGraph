@@ -77,7 +77,7 @@ public final class ProloGraalEvalRootNode extends RootNode {
          ProloGraalBoolean callResult =
                (ProloGraalBoolean) Truffle.getRuntime()
                      .createCallTarget(reference.get().getResolverNode())
-                     .call(runtime, currentBranches);
+                     .call(runtime, currentBranches, null);
          answers.add(callResult);
       }
 

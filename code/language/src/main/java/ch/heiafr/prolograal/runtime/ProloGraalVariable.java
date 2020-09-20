@@ -2,6 +2,8 @@ package ch.heiafr.prolograal.runtime;
 
 import ch.heiafr.prolograal.ProloGraalLanguage;
 import ch.heiafr.prolograal.exceptions.ProloGraalTypeCastingError;
+import ch.heiafr.prolograal.nodes.ProloGraalProofTreeNode;
+
 import com.oracle.truffle.api.interop.InteropLibrary;
 import com.oracle.truffle.api.interop.UnsupportedMessageException;
 import com.oracle.truffle.api.library.ExportLibrary;
@@ -32,6 +34,8 @@ public final class ProloGraalVariable extends ProloGraalTerm<ProloGraalVariable>
    private boolean isBound = false;
    // the bound value of this variable (or null if unbound)
    private ProloGraalTerm<?> boundValue;
+
+   private ProloGraalProofTreeNode observingProofTreeNode;
 
    /**
     * Creates a new variable, adding a suffix if the name starts with an underscore (anonymous variable)
@@ -85,6 +89,15 @@ public final class ProloGraalVariable extends ProloGraalTerm<ProloGraalVariable>
       return name;
    }
 
+   public ProloGraalTerm<?> getBoundValue() {
+      return boundValue;
+   }
+
+   @Override
+   public void observe(ProloGraalProofTreeNode proofTreeNode) {
+      observingProofTreeNode = proofTreeNode;
+   }
+
    /**
     * Returns the root value of this variable. The root value is the term that is at the end of the bounding chain.
     * This is either the root value of the term that this variable is currently bound to, or, if this variable is
@@ -120,6 +133,7 @@ public final class ProloGraalVariable extends ProloGraalTerm<ProloGraalVariable>
       }
       this.isBound = true;
       this.boundValue = other;
+      if (observingProofTreeNode != null) observingProofTreeNode.variableListener(this);
       if (ProloGraalLanguage.DEBUG_MODE) {
          System.out.println(name + " = " + other);
       }
@@ -142,6 +156,11 @@ public final class ProloGraalVariable extends ProloGraalTerm<ProloGraalVariable>
    @Override
    public String toString() {
       return this.name + (this.isBound ? " = " + this.getRootValue().toString() : "");
+   }
+
+   @Override
+   public String toGraphString() {
+      return "(" + this.name + (this.isBound ? " : " + this.getRootValue().toString() : "") + ")";
    }
 
    /**
