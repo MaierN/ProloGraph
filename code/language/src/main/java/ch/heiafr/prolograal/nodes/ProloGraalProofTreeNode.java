@@ -225,22 +225,21 @@ public class ProloGraalProofTreeNode extends Node {
                      }
                      //System.out.println("=== new bound variables: " + listenedVariables);
 
-                     // only execute built-in the first time we traverse their nodes
-                     if (true || branches.isEmpty()) {
-                        if(currentGoal instanceof ProloGraalBuiltinStructure){
-                           if(!((ProloGraalBuiltinStructure)currentGoal).getBuiltin().executeBuiltin(frame).asBoolean()) {
-                              returnedValue = new ProloGraalFailure();
-                              executeState = ExecuteState.RETURN;
-                              break;
-                           }
-                        }else if (unifiableClause instanceof ProloGraalBuiltinClause) {
-                           // if the clause is a built-in, execute its internal behaviour
-                           if (!((ProloGraalBuiltinClause) unifiableClause).executeBuiltin(frame).asBoolean()) {
-                              //if the builtin don't provide a success, return a failure and break the switch case
-                              returnedValue = new ProloGraalFailure();
-                              executeState = ExecuteState.RETURN;
-                              break;
-                           }
+                     // only execute built-in side-effects the first time we traverse their nodes
+                     frame.getArguments()[3] = !branches.isEmpty();
+                     if(currentGoal instanceof ProloGraalBuiltinStructure){
+                        if(!((ProloGraalBuiltinStructure)currentGoal).getBuiltin().executeBuiltin(frame).asBoolean()) {
+                           returnedValue = new ProloGraalFailure();
+                           executeState = ExecuteState.RETURN;
+                           break;
+                        }
+                     } else if (unifiableClause instanceof ProloGraalBuiltinClause) {
+                        // if the clause is a built-in, execute its internal behaviour
+                        if (!((ProloGraalBuiltinClause) unifiableClause).executeBuiltin(frame).asBoolean()) {
+                           //if the builtin don't provide a success, return a failure and break the switch case
+                           returnedValue = new ProloGraalFailure();
+                           executeState = ExecuteState.RETURN;
+                           break;
                         }
                      }
 

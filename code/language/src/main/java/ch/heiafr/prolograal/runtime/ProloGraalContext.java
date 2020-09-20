@@ -23,7 +23,7 @@ public class ProloGraalContext {
    // the interpreter node
    private ProloGraalInterpreterNode interpreterNode;
    // the resolver node
-   private ProloGraalResolverNode resolverNode;
+   public ProloGraalResolverNode resolverNode;
 
    // input and output streams that we get from the environment
    private final InputStream input;

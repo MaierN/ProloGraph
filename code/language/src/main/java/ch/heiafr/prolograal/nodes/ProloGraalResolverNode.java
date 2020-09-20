@@ -29,8 +29,11 @@ public final class ProloGraalResolverNode extends RootNode {
       this.clauses = context.getRuntime().getClauses();
    }
 
+   public VirtualFrame frame;
+
    @Override
    public Object execute(VirtualFrame frame) {
+      this.frame = frame;
       // we get the goal runtime and the current branches from the frame arguments, passed by the interpreter
       ProloGraalRuntime goalRuntime = (ProloGraalRuntime) frame.getArguments()[0];
       @SuppressWarnings("unchecked")

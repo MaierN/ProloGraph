@@ -170,7 +170,7 @@ public class ProloGraalInterpreterNode extends RootNode {
             callResult =
                   (ProloGraalBoolean) Truffle.getRuntime()
                   .createCallTarget(context.getResolverNode())
-                  .call(runtime, currentBranches, treeGraphNode);
+                  .call(runtime, currentBranches, treeGraphNode, false);
             if (currentBranches.isEmpty()) {
                // there are no more solutions
                lastRuntime = null;

@@ -16,7 +16,6 @@ public final class ProloGraalMain {
     * The main entry point.
     */
    public static void main(String[] args) throws IOException {
-      Source source;
       Map<String, String> options = new HashMap<>();
       String file = null;
       for (String arg : args) {

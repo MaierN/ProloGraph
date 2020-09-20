@@ -26,13 +26,16 @@ public abstract class ProloGraalWriteHeadNode extends ProloGraalUnaryHeadNode {
     @Specialization
     @CompilerDirectives.TruffleBoundary
     public ProloGraalBoolean returnValue(ProloGraalTerm arg) {
-        String str = arg.getRootValue().toString();
-        if(str.startsWith("'") && str.endsWith("'")) {
-            // strip single quotes
-            str = str.substring(1, str.length()-1);
+        boolean is_redo = (Boolean)context.resolverNode.frame.getArguments()[3];
+        if (!is_redo) {
+            String str = arg.getRootValue().toString();
+            if(str.startsWith("'") && str.endsWith("'")) {
+                // strip single quotes
+                str = str.substring(1, str.length()-1);
+            }
+            writer.print(str);
+            writer.flush();
         }
-        writer.print(str);
-        writer.flush();
         return new ProloGraalSuccess();
     }
 
