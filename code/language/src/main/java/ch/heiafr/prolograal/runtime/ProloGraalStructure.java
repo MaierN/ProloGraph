@@ -149,9 +149,9 @@ public class ProloGraalStructure extends ProloGraalTerm<ProloGraalStructure> {
          ProloGraalList list = ProloGraalList.fromInternal(this);
          String tail = !list.getTail().equals(ProloGraalBuiltinAtoms.EMPTY_LIST) ? " | " + list.getTail().toString()
                  : "";
-         return "[" + list.getItems().stream().map(Object::toString).collect(Collectors.joining(", ")) + tail + "]";
+         return "[" + list.getItems().stream().map(Object::toString).collect(Collectors.joining(",")) + tail + "]";
       }
-      String subtermsString = subterms.stream().map(ProloGraalTerm::toGraphStringShort).collect(Collectors.joining(", "));
+      String subtermsString = subterms.stream().map(ProloGraalTerm::toGraphStringShort).collect(Collectors.joining(","));
       return functor.getName() + "(" + subtermsString + ")";
    }
 

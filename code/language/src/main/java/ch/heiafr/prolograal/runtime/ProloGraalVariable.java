@@ -160,7 +160,7 @@ public final class ProloGraalVariable extends ProloGraalTerm<ProloGraalVariable>
 
    @Override
    public String toGraphString() {
-      return "(" + this.name + (this.isBound ? " : " + this.getRootValue().toString() : "") + ")";
+      return "(" + this.name + (this.isBound ? ":" + this.getRootValue().toString() : "") + ")";
    }
    @Override
    public String toGraphStringShort() {
