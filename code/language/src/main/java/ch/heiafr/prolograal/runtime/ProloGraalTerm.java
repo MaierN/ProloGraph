@@ -46,6 +46,9 @@ public abstract class ProloGraalTerm<T extends ProloGraalTerm<T>> extends ProloG
    public String toGraphString() {
       return toString();
    }
+   public String toGraphStringShort() {
+      return toGraphString();
+   }
 
    /**
     * Returns the "root value" of this term. The root value is the term at the end of a possible chain of

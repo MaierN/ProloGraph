@@ -25,6 +25,7 @@ public class TreeGraphNode {
                     for (String s : text) {
                         r += "\"" + s + "\", ";
                     }
+                    r = r.substring(0, r.length() - 2);
                     r += "], ";
                 }
             }
@@ -33,6 +34,7 @@ public class TreeGraphNode {
                 for (String s : linkText) {
                     r += "\"" + s + "\", ";
                 }
+                r = r.substring(0, r.length() - 2);
                 r += "], ";
             }
             if (subText == null) {
@@ -40,9 +42,11 @@ public class TreeGraphNode {
                 for (TreeGraphNode child : children) {
                     r += child.toString() + ", ";
                 }
+                r = r.substring(0, r.length() - 2);
                 r += "], ";
             }
         }
+        r = r.substring(0, r.length() - 2);
         r += "}";
 
         return r;

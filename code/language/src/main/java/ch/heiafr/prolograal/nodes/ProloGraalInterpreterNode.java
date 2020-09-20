@@ -34,6 +34,7 @@ public class ProloGraalInterpreterNode extends RootNode {
    private final ProloGraalContext context;
 
    private boolean showGraph = false;
+   private boolean autoRedo = false;
 
    public ProloGraalInterpreterNode(ProloGraalLanguage language) {
       super(language);
@@ -58,14 +59,18 @@ public class ProloGraalInterpreterNode extends RootNode {
       while (true) {
          String line = null;
 
-         writer.print("?- ");
-         writer.flush();
+         if (lastRuntime == null || !autoRedo) {
+            writer.print("?- ");
+            writer.flush();
 
-         try {
-           line = reader.readLine();
-         } catch (IOException ex) {
-            ex.printStackTrace();
-            break;
+            try {
+            line = reader.readLine();
+            } catch (IOException ex) {
+               ex.printStackTrace();
+               break;
+            }
+         } else {
+            line = "redo.";
          }
 
          writer.println();
@@ -109,6 +114,14 @@ public class ProloGraalInterpreterNode extends RootNode {
             System.out.println("graph disabled");
             treeGraphNode = null;
             showGraph = false;
+            continue;
+         } else if (line.equals("autoredo.")) {
+            System.out.println("auto redo enabled");
+            autoRedo = true;
+            continue;
+         } else if (line.equals("noautoredo.")) {
+            System.out.println("auto redo enabled");
+            autoRedo = false;
             continue;
          } else if (line.equals("help") || line.equals("help.")) {
             writer.println(

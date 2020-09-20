@@ -162,6 +162,10 @@ public final class ProloGraalVariable extends ProloGraalTerm<ProloGraalVariable>
    public String toGraphString() {
       return "(" + this.name + (this.isBound ? " : " + this.getRootValue().toString() : "") + ")";
    }
+   @Override
+   public String toGraphStringShort() {
+      return this.getRootValue().toString();
+   }
 
    /**
     * Checks whether the given structure contains a reference to this variable, effectively implementing the

@@ -151,8 +151,8 @@ public class ProloGraalStructure extends ProloGraalTerm<ProloGraalStructure> {
                  : "";
          return "[" + list.getItems().stream().map(Object::toString).collect(Collectors.joining(", ")) + tail + "]";
       }
-      String subtermsString = subterms.toString();
-      return functor.getName() + "(" + subtermsString.substring(1, subtermsString.length() - 1) + ")";
+      String subtermsString = subterms.stream().map(ProloGraalTerm::toGraphStringShort).collect(Collectors.joining(", "));
+      return functor.getName() + "(" + subtermsString + ")";
    }
 
    /**
